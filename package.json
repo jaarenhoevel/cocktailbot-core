@@ -1,0 +1,18 @@
+{
+  "name": "cocktail-bot",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Fully automated cocktail and longdrink mixer",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "János Arenhövel",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.2",
+    "lowdb": "^3.0.0",
+    "serialport": "^9.2.8",
+    "socket.io": "^4.4.1"
+  }
+}

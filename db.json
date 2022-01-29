@@ -1,0 +1,22 @@
+{
+  "ingredients": {},
+  "drinks": {
+    "mojito": {
+      "name": "Mojito",
+      "ingredients": [
+        {
+          "name": "rum_white",
+          "amount": 0.2
+        },
+        {
+	  "name": "soda",
+          "amount": 0.6
+	},
+	{
+	  "name": "juice_lime",
+	  "amount": 0.2
+	}
+      ]
+    }	
+  }
+}
