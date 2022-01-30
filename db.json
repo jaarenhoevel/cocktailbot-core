@@ -5,18 +5,18 @@
       "name": "Mojito",
       "ingredients": [
         {
-          "name": "rum_white",
-          "amount": 0.2
+          "id": "rum_white",
+          "portion": 0.2
         },
         {
-	  "name": "soda",
-          "amount": 0.6
-	},
-	{
-	  "name": "juice_lime",
-	  "amount": 0.2
-	}
+          "id": "soda",
+          "portion": 0.6
+        },
+        {
+          "id": "juice_lime",
+          "portion": 0.2
+        }
       ]
-    }	
+    }
   }
 }
