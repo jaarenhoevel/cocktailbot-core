@@ -73,7 +73,7 @@ class Controller {
             }
 
             setTimeout(() => {
-                reject(new Error("No response within 1000ms!"));
+                reject(new Error(`No response within 1000ms! Command ID: ${commandId} Command: ${command}`));
                 delete this.awaitingResponse[commandId];
             }, 1000);
         });
