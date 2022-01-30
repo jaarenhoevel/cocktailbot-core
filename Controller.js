@@ -64,6 +64,7 @@ class Controller {
 
     sendCommand(command) {
         const commandId = [...Array(8)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+        const { serialTimeout = 1000 } = this.config;
         
         const promise = new Promise(async (resolve, reject) => {
             try {
@@ -75,7 +76,7 @@ class Controller {
             setTimeout(() => {
                 reject(new Error(`No response within 1000ms! Command ID: ${commandId} Command: ${command}`));
                 delete this.awaitingResponse[commandId];
-            }, 1000);
+            }, serialTimeout);
         });
 
         this.awaitingResponse[commandId] = promise;
