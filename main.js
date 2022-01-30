@@ -17,7 +17,7 @@ await localdb.read()
 
 // Use defaults if db is empty
 db.data ||= { ingredients: {}, drinks: {} }
-localdb.data ||= { config: {}, reservoirs: [], ingredients: {}, drinks: {} }
+localdb.data ||= { config: { pumps: {}, outputs: {} }, reservoirs: [], ingredients: {}, drinks: {} }
 
 // Initiate cocktail bot
 const menu = new Menu(db, localdb);
@@ -35,7 +35,11 @@ app.get('/drinks', (req, res) => {
         var availableDrinks = {};
         var drinks = menu.getDrinks();
         Object.keys(drinks).forEach(id => {
-            if (bot.getDrinkAmount(drinks[id]) > minAmount) availableDrinks[id] = drinks[id];
+            const available = bot.getDrinkAmount(drinks[id]);
+            if ( available > minAmount) {
+                availableDrinks[id] = drinks[id];
+                availableDrinks[id].available = available;
+            }
         });
         
         res.status(200).send(availableDrinks);
@@ -50,6 +54,14 @@ app.get('/ingredients', (req, res) => {
 
 app.get('/reservoirs', (req, res) => {
     res.status(200).send(bot.reservoirs);
+});
+
+app.get('/status', (req, res) => {
+    res.status(200).send(bot.status);
+});
+
+app.get('/config', (req, res) => {
+    res.status(200).send(bot.config);
 });
 
 app.listen(8080);
