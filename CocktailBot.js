@@ -8,11 +8,16 @@ class CocktailBot {
         this.status = {
             drink: null,
             ready: false,
+            activeOutput: null
         }
 
         this.controller = new Controller(config);
-        this.controller.connect().then(() => this.status.ready = true).catch(error => {
-            console.log(error.message);    
+        this.controller.connect()
+        .then(() => {
+            this.status.ready = true;
+            this.setActiveOutput("default").catch(err => console.log(err.message));
+        }).catch(err => {
+            console.log(err.message);    
         });
     }
 
@@ -39,7 +44,7 @@ class CocktailBot {
         return this.reservoirs.filter(reservoir => reservoir.content === ingredient);
     }
 
-    async startPump(pumpId) {
+    async startPump(pumpId = "forward") {
         if (!this.config.pumps.hasOwnProperty(pumpId)) throw new Error("No such pump!");
         const pump = this.config.pumps[pumpId];
 
@@ -53,7 +58,8 @@ class CocktailBot {
         await Promise.all(promises);
     }
 
-    async setActiveOutput(activeOutputId) {
+    async setActiveOutput(activeOutputId = "default") {
+        if (!this.config.outputs.hasOwnProperty(activeOutputId) && activeOutputId !== null) throw new Error("No such output!");
         const promises = [];
         
         Object.keys(this.config.outputs).forEach(outputId => {
@@ -61,6 +67,8 @@ class CocktailBot {
         });
 
         await Promise.all(promises);
+
+        this.status.activeOutput = activeOutputId;
     }
 
     async stopPump() {
