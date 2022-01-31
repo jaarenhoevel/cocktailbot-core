@@ -62,13 +62,18 @@ class Controller {
         });
     }
 
-    sendCommand(command) {
+    sendCommand(commandString) {
+        // Generate command ID
         const commandId = [...Array(8)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+        
         const { serialTimeout = 1000 } = this.config;
+
+        // Add command ID as first parameter of command
+        const command = commandString.split(" ").splice(1, 0, commandId);
         
         const promise = new Promise(async (resolve, reject) => {
             try {
-                await this.writeSerial(`${command} ${commandId}`);
+                await this.writeSerial(command.join(" "));
             } catch (err) {
                 return reject(err);
             }
