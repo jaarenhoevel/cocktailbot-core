@@ -23,6 +23,7 @@ class CocktailBot {
 
     async makeDrink(drink, amount) {
         if (!this.status.ready) throw new Error("CocktailBot not ready!");
+        if (!drink) throw new Error("No drink specified!");
         if (this.status.activeOutput === null) throw new Error("Select active output!");
 
         const availableAmount = this.getDrinkAmount(drink);
@@ -33,19 +34,20 @@ class CocktailBot {
         const simpleRecipe = [];
 
         // Create simple recipe with just ingredient id and amount
-        drink.ingredient.forEach(ingredient => {
+        drink.ingredients.forEach(ingredient => {
             simpleRecipe.push({
                 ingredientId: ingredient.id,
                 amount: amount * ingredient.portion
             });
         });
 
-        simpleRecipe.forEach(async ({ ingredientId, amount }) => {
+        await this.asyncEach(simpleRecipe, async ({ ingredientId, amount }) => {
             try {
                 await this.pumpIngredient(ingredientId, amount)
             } catch (err) {
                 console.log(err.message);
             }
+            return true;
         });
 
         this.status.ready = true;
@@ -56,13 +58,15 @@ class CocktailBot {
     async pumpIngredient(ingredientId, amount) {
         const ingredientReservoirs = this.getReservoirsByIngredient(ingredientId);
 
-        const { reversePumpTime = 2500 } = this.config;
+        const { reversePumpTime = 2500, pumpTimeout= 10000 } = this.config;
 
         if (ingredientReservoirs.length === 0) throw new Error(`No reservoirs for ingredient ${ingredientId}`);
 
-        const startWeight = this.controller.getWeight();
+        const startWeight = await this.controller.getWeight();
 
-        ingredientReservoirs.every(async reservoir => {
+        ingredientReservoirs
+
+        await this.asyncEach(ingredientReservoirs, async (reservoir) => {
             // Open reservoir valves
             await this.setReservoir(reservoir, true);
             
@@ -73,7 +77,7 @@ class CocktailBot {
 
             // Wait for weight or timeout
             try {
-                await this.waitForWeight(startWeight + amount);
+                await this.waitForWeight(startWeight + amount, pumpTimeout);
                 success = true;
             } catch (err) {
                 console.log(err.message);
@@ -107,14 +111,14 @@ class CocktailBot {
         });
 
         // Reject if all reservoirs have been tried
-        reject(new Error(`Could not pump ${amount}ml of ${ingredientId}!`));
+        throw new Error(`Could not pump ${amount}ml of ${ingredientId}!`);
     }
 
     async backwash() {
         const {backwashTime = 5000} = this.config;
 
-        const freshWaterReservoir = this.getReservoirByIngredient("backwash_water_fresh");
-        const usedWaterReservoir = this.getReservoirByIngredient("backwash_water_fresh");
+        const freshWaterReservoir = this.getReservoirsByIngredient("backwash_water_fresh").shift();
+        const usedWaterReservoir = this.getReservoirsByIngredient("backwash_water_used").shift();
 
         if (!this.status.ready) throw new Error("CocktailBot not ready!");
         if (!freshWaterReservoir || !usedWaterReservoir) throw new Error("Can't backwash because there are no backwash water reservoirs!");
@@ -123,10 +127,10 @@ class CocktailBot {
 
         // Close output valves
         const currentOutput = this.status.activeOutput;
-        await this.setActiveOutput(none);
+        await this.setActiveOutput(null);
         
         // Open fresh and used water reservoir valves
-        await Promise.all(this.setReservoir(freshWaterReservoir, true), this.setReservoir(usedWaterReservoir, true));
+        await Promise.all([this.setReservoir(freshWaterReservoir, true), this.setReservoir(usedWaterReservoir, true)]);
 
         // Pump forwards for backwash time
         await this.startPump();
@@ -149,7 +153,7 @@ class CocktailBot {
             this.delay(backwashTime);
 
             // Close end air valves again
-            promises = [];
+            promises.length = 0;
             endAirValves.forEach(valve => {
                 promises.push(this.controller.setRelay(valve.relayId, false)); 
             });
@@ -234,10 +238,11 @@ class CocktailBot {
         await Promise.all(promises);
     }
 
-    async setReservoir(reservoir, open) {
+    async setReservoir(reservoir, open) {       
+        if (!reservoir.valves) throw new Error("No reservoir specified!");
+        
         const relayIds = [];
 
-        relayIds.push(reservoir.relayId);
         reservoir.valves.forEach(valve => {
             relayIds.push(valve.relayId);
         });
@@ -249,10 +254,14 @@ class CocktailBot {
     }
 
     async waitForWeight(targetWeight, timeout) {
+        //console.log(`Waiting for target weight of ${targetWeight}g with ${timeout}ms timeout`);
+        
         return new Promise((resolve, reject) => {
             const interval = setInterval(async () => {
-                const weight = this.controller.getWeight();
+                const weight = await this.controller.getWeight();
                 if (weight >= targetWeight) resolve();
+
+                //console.log(`Current weight is ${weight}g, but we're waiting for at least ${targetWeight}g`);
             }, 500);
             
             setTimeout(() => {
@@ -266,6 +275,13 @@ class CocktailBot {
         return new Promise((resolve, reject) => {
             setTimeout(resolve, ms);
         })
+    }
+
+    async asyncEach(array, callback) {
+        for (let index = 0; index < array.length; index++) {
+            const result = await callback(array[index], index, array);
+            if (result !== true) return;
+        }
     }
 
 }
