@@ -40,7 +40,7 @@ class CocktailBot {
             });
         });
 
-        simpleRecipe.forEach(({ ingredientId, amount }) => {
+        simpleRecipe.forEach(async ({ ingredientId, amount }) => {
             try {
                 await this.pumpIngredient(ingredientId, amount)
             } catch (err) {
@@ -62,7 +62,7 @@ class CocktailBot {
 
         const startWeight = this.controller.getWeight();
 
-        ingredientReservoirs.every(reservoir => {
+        ingredientReservoirs.every(async reservoir => {
             // Open reservoir valves
             await this.setReservoir(reservoir, true);
             
