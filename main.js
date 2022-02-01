@@ -64,6 +64,19 @@ app.get('/config', (req, res) => {
     res.status(200).send(bot.config);
 });
 
+app.get('/test', (req, res) => {
+    const drinks = menu.getDrinks();
+    
+    bot.makeDrink(drinks.mojito, 100)
+    .then(() => {
+        res.status(200).send("Success");
+    })
+    .catch(err => {
+        res.status(500).send(err.message);
+        console.log(err);
+    });
+});
+
 app.listen(8080);
 
 // Write local db content to localdb.json
