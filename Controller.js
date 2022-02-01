@@ -69,11 +69,14 @@ class Controller {
         const { serialTimeout = 1000 } = this.config;
 
         // Add command ID as first parameter of command
-        const command = commandString.split(" ").splice(1, 0, commandId);
+        const commandData = commandString.split(" ");
+        commandData.splice(1, 0, commandId);
+
+        const command = commandData.join(" ");
         
         const promise = new Promise(async (resolve, reject) => {
             try {
-                await this.writeSerial(command.join(" "));
+                await this.writeSerial(command);
             } catch (err) {
                 return reject(err);
             }
