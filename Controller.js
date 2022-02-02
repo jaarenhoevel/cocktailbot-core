@@ -14,7 +14,10 @@ class Controller {
 
         return new Promise((resolve, reject) => {
             this.serial = new SerialPort(port, {
-                baudRate: baud
+                baudRate: baud,
+                dataBits: 8,
+                stopBits: 1,
+                parity: "none"
             }, err => {
                 if (err) {
                     reject(err);
@@ -28,12 +31,19 @@ class Controller {
                 parser.on("data", line => this.parseSerial(line));
                 
                 // Wait x seconds for interface to initialize
-                setTimeout(resolve, 4000);
+                this.sendCommand("handshake", 10).then(() => {
+                    resolve();
+                    console.log("Connection to interface established");
+                }).catch(() => {
+                    reject(new Error("Could not establish connection to interface!"));
+                })
             });
         });
     }
 
     parseSerial(line) {
+        console.info(`<- Received serial line: ${line.replace(/(\r\n|\n|\r)/gm, "")}`);
+        
         const data = line.replace(/(\r\n|\n|\r)/gm, "").split(" ");
 
         const commandId = data.shift();
@@ -51,6 +61,8 @@ class Controller {
     }
 
     writeSerial(line) {
+        console.info(`-> Sending serial line: ${line}`);
+        
         const { commandTermination = "\n" } = this.config;
         
         return new Promise((resolve, reject) => {
@@ -63,7 +75,7 @@ class Controller {
         });
     }
 
-    sendCommand(commandString) {
+    sendCommand(commandString, retries = 2) {
         // Generate command ID
         const commandId = [...Array(8)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
         
@@ -87,9 +99,17 @@ class Controller {
                 reject: err => {reject(err)}
             };
 
-            setTimeout(() => {
-                reject(new Error(`No response within 1000ms! Command ID: ${commandId} Command: ${command}`));
-                delete this.awaitingResponse[commandId];
+            const interval = setInterval(() => {
+                if (retries === 0 || !this.awaitingResponse.hasOwnProperty(commandId)) {
+                    reject(new Error(`No response within 1000ms! Command ID: ${commandId} Command: ${command}`));
+                    delete this.awaitingResponse[commandId];
+                    clearInterval(interval);
+                    return;
+                }
+
+                retries --;
+                console.warn(`Retrying serial command: ${command} - ${retries} tries left`);
+                this.writeSerial(command);
             }, serialTimeout);
         });
 
