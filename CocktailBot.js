@@ -15,9 +15,9 @@ class CocktailBot {
         this.controller.connect()
         .then(() => {
             this.status.ready = true;
-            this.setActiveOutput("default").catch(err => console.log(err.message));
+            this.setActiveOutput("default").catch(err => console.log(err));
         }).catch(err => {
-            console.log(err.message);    
+            console.log(err);    
         });
     }
 
@@ -45,7 +45,7 @@ class CocktailBot {
             try {
                 await this.pumpIngredient(ingredientId, amount)
             } catch (err) {
-                console.log(err.message);
+                console.log(err);
             }
             return true;
         });
@@ -64,7 +64,7 @@ class CocktailBot {
 
         const startWeight = await this.controller.getWeight();
 
-        ingredientReservoirs
+        let success = false;
 
         await this.asyncEach(ingredientReservoirs, async (reservoir) => {
             // Open reservoir valves
@@ -73,14 +73,14 @@ class CocktailBot {
             // Start pumping
             await this.startPump();
 
-            const success = false;
+            success = false;
 
             // Wait for weight or timeout
             try {
                 await this.waitForWeight(startWeight + amount, pumpTimeout);
                 success = true;
             } catch (err) {
-                console.log(err.message);
+                console.log(err);
             }
 
             // Stop pump
@@ -101,14 +101,15 @@ class CocktailBot {
 
             // Check if pumping was successful
             if (success) {
-                // Resolve promise and return false to stop every loop
-                resolve();
+                // Return false to stop every loop
                 return false;
             } else {
                 // Continue with next reservoir
                 return true;
             }
         });
+
+        if (success) return;
 
         // Reject if all reservoirs have been tried
         throw new Error(`Could not pump ${amount}ml of ${ingredientId}!`);
@@ -254,7 +255,7 @@ class CocktailBot {
     }
 
     async waitForWeight(targetWeight, timeout) {
-        //console.log(`Waiting for target weight of ${targetWeight}g with ${timeout}ms timeout`);
+        console.log(`Waiting for target weight of ${targetWeight}g with ${timeout}ms timeout`);
         
         return new Promise((resolve, reject) => {
             const interval = setInterval(async () => {
