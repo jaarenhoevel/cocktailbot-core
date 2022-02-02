@@ -28,7 +28,7 @@ class Controller {
                 parser.on("data", line => this.parseSerial(line));
                 
                 // Wait x seconds for interface to initialize
-                setTimeout(resolve, 2000);
+                setTimeout(resolve, 4000);
             });
         });
     }
