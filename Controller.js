@@ -10,11 +10,11 @@ class Controller {
     }
 
     connect() {
-        const { port = "/dev/ttyUSB0", baud = 9600 } = this.config;
+        const { serialPort = "/dev/ttyUSB0", serialBaud = 9600 } = this.config;
 
         return new Promise((resolve, reject) => {
-            this.serial = new SerialPort(port, {
-                baudRate: baud,
+            this.serial = new SerialPort(serialPort, {
+                baudRate: serialBaud,
                 dataBits: 8,
                 stopBits: 1,
                 parity: "none"
@@ -63,12 +63,12 @@ class Controller {
     writeSerial(line) {
         console.info(`-> Sending serial line: ${line}`);
         
-        const { commandTermination = "\n" } = this.config;
+        const { serialCommandTermination = "\n" } = this.config;
         
         return new Promise((resolve, reject) => {
             if (this.serial === null) return reject(new Error("Serial port is not opened!"));
             
-            this.serial.write(line + commandTermination, err => {
+            this.serial.write(line + serialCommandTermination, err => {
                 if (err) reject(err);
                 else resolve();
             });            
