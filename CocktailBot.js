@@ -58,7 +58,7 @@ class CocktailBot {
     async pumpIngredient(ingredientId, amount) {
         const ingredientReservoirs = this.getReservoirsByIngredient(ingredientId);
 
-        const { reversePumpTime = 2500, pumpTimeout= 10000 } = this.config;
+        const { reversePumpTime = 2500, pumpTimeout= 10000, pumpOvershootAmount = 10, pumpOvershootSettleTime = 1000, pumpLostAmount = 5 } = this.config;
 
         if (ingredientReservoirs.length === 0) throw new Error(`No reservoirs for ingredient ${ingredientId}`);
 
@@ -77,7 +77,7 @@ class CocktailBot {
 
             // Wait for weight or timeout
             try {
-                await this.waitForWeight(startWeight + amount, pumpTimeout);
+                await this.waitForWeight(startWeight + (amount - pumpOvershootAmount), pumpTimeout);
                 success = true;
             } catch (err) {
                 console.log(err);
@@ -93,11 +93,16 @@ class CocktailBot {
                 await this.stopPump();
             }
 
+            // Allow weight to settle
+            if (reversePumpTime < pumpOvershootSettleTime) {
+                await this.delay(pumpOvershootSettleTime - reversePumpTime);
+            }
+
             // Close reservoir valves
             await this.setReservoir(reservoir, false);
 
             // Substract weight gain from reservoir amount
-            reservoir.amount -= await this.controller.getWeight() - startWeight;
+            reservoir.amount -= (await this.controller.getWeight() - startWeight) + pumpLostAmount;
 
             // Check if pumping was successful
             if (success) {
