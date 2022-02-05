@@ -1,5 +1,16 @@
 {
-  "ingredients": {},
+  "ingredients": {
+    "rum_white": {
+      "name": "White Rum",
+      "proof": 0.4
+    },
+    "soda": {
+      "name": "Soda"
+    },
+    "juice_lime": {
+      "name": "Lime Juice"
+    }
+  },
   "drinks": {
     "mojito": {
       "name": "Mojito",
@@ -15,6 +26,19 @@
         {
           "id": "juice_lime",
           "portion": 0.2
+        }
+      ]
+    },
+    "lime_water": {
+      "name": "Lame Water",
+      "ingredients": [
+        {
+          "id": "juice_lime",
+          "portion": 0.5
+        },
+        {
+          "id": "soda",
+          "portion": 0.5
         }
       ]
     }
