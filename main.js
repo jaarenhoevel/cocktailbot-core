@@ -48,6 +48,36 @@ app.get('/drinks', (req, res) => {
     }
 });
 
+app.get('/drinks/:drinkId', (req, res) => {    
+    const drink = menu.getDrink(req.params.drinkId);
+    if (!drink) {
+        res.status(404).send({"error": "No such drink!"});
+        return;
+    }
+    res.status(200).send(drinks[req.params.drinkId]);
+});
+
+app.patch('/drinks/:drinkId', (req, res) => {
+    const { amount = -1 } = req.body;
+    const drink = menu.getDrink(req.params.drinkId);
+
+    if (!drink) {
+        res.status(404).send({"error": "No such drink!"});
+        return;
+    }
+
+    if (amount <= 0) {
+        res.status(400).send({"error": "No amount specified!"});
+        return;
+    }
+
+    bot.makeDrink(drink, amount).catch(err => {
+        console.log(err);
+    });
+
+    res.status(200).send({"success": "Production started!"});
+});
+
 app.get('/ingredients', (req, res) => {    
     res.status(200).send(menu.getIngredients());
 });
@@ -60,21 +90,23 @@ app.get('/status', (req, res) => {
     res.status(200).send(bot.status);
 });
 
-app.get('/config', (req, res) => {
-    res.status(200).send(bot.config);
+app.patch('/status', (req, res) => {
+    const { activeOutput = null } = req.body;
+
+    if (!activeOutput) {
+        res.status(400).send({"error": "No output specified!"});
+        return;
+    }
+
+    bot.setActiveOutput(activeOutput).then(() => {
+        res.status(200).send({"success": "Output set!"});
+    }).catch(err => {
+        res.status(500).send({"error": err.message});
+    });
 });
 
-app.get('/test', (req, res) => {
-    const drinks = menu.getDrinks();
-    
-    bot.makeDrink(drinks.mojito, 100)
-    .then(() => {
-        res.status(200).send("Success");
-    })
-    .catch(err => {
-        res.status(500).send(err.message);
-        console.log(err);
-    });
+app.get('/config', (req, res) => {
+    res.status(200).send(bot.config);
 });
 
 app.listen(8080);
