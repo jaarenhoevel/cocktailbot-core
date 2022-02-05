@@ -8,6 +8,7 @@ Configuration Options
 | Name                     | Type    | Unit | Default      | Description                                                                                             |
 |--------------------------|---------|------|--------------|---------------------------------------------------------------------------------------------------------|
 | backwashTime             | integer | ms   | 5000         | How long to pump water from fresh water tank to used water tank to clean pipe after each produced drink |
+| minStartWeight           | integer | g    | 100          | Pumping only starts when weight is above this value to prevent pumping without a glass present          |
 | pumpLostAmount           | integer | ml   | 5            | How much liquid is lost during filling process. Used to calculate reservoir amount                      |
 | pumpOvershootAmount      | integer | ml   | 10           | How much liquid is dripping out after pump is stopped                                                   |
 | pumpOvershootSettleTime  | integer | ms   | 1000         | How long to wait after stopping pump before measuring actual pumped amount                              |

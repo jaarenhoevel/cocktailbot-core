@@ -58,11 +58,13 @@ class CocktailBot {
     async pumpIngredient(ingredientId, amount) {
         const ingredientReservoirs = this.getReservoirsByIngredient(ingredientId);
 
-        const { reversePumpTime = 2500, pumpTimeout= 10000, pumpOvershootAmount = 10, pumpOvershootSettleTime = 1000, pumpLostAmount = 5 } = this.config;
+        const { reversePumpTime = 2500, pumpTimeout= 10000, pumpOvershootAmount = 10, pumpOvershootSettleTime = 1000, pumpLostAmount = 5, minStartWeight = 100 } = this.config;
 
         if (ingredientReservoirs.length === 0) throw new Error(`No reservoirs for ingredient ${ingredientId}`);
 
         const startWeight = await this.controller.getWeight();
+
+        if (startWeight < minStartWeight) throw new Error(`Current weight is ${minStartWeight - startWeight}g below threshold!`);
 
         let success = false;
 
