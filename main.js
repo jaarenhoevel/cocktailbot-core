@@ -37,7 +37,7 @@ app.get('/drinks', (req, res) => {
         var drinks = menu.getDrinks();
         Object.keys(drinks).forEach(id => {
             const available = bot.getDrinkAmount(drinks[id]);
-            if ( available > minAmount) {
+            if ( available >= minAmount) {
                 availableDrinks[id] = drinks[id];
                 availableDrinks[id].available = available;
             }
