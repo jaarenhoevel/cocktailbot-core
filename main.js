@@ -191,6 +191,62 @@ app.get('/config', (req, res) => {
     res.status(200).send(bot.config);
 });
 
+app.get('/sensors/:sensorId', (req, res) => {
+    if (req.params.sensorId === "scale") {
+        bot.controller.getWeight().then(weight => {
+            res.status(200).send({"weight": weight});
+        }).catch(err => {
+            res.status(500).send({"error": err.message});
+        });
+        return;  
+    }
+
+    if (req.params.sensorId === "temperature") {
+        bot.controller.getTemperature().then(temperature => {
+            res.status(200).send({"temperature": temperature});
+        }).catch(err => {
+            res.status(500).send({"error": err.message});
+        });
+        return;  
+    }
+
+    res.status(400).send({"error": "No such sensor!"});
+});
+
+app.patch('/sensors/:sensorId', (req, res) => {
+    if (req.params.sensorId === "scale") {
+        const { weight } = req.body;
+
+        if (weight === undefined || weight < 0) {
+            res.status(400).send({"error": "No weight specified!"});
+            return;
+        }
+
+        if (weight === 0) {
+            bot.controller.tareScale().then(() => {
+                res.status(200).send({"success": "Scale tared!"});
+            }).catch(err => {
+                res.status(500).send({"error": err.message});
+            });
+            return; 
+        }
+
+        bot.controller.calibrateScale(parseInt(weight)).then(() => {
+            res.status(200).send({"success": "Scale calibrated!"});
+        }).catch(err => {
+            res.status(500).send({"error": err.message});
+        });
+        return; 
+    }
+
+    if (req.params.sensorId === "temperature") {
+        res.status(400).send({"error": "Can't calibrate temperature!"});
+        return;
+    }
+
+    res.status(400).send({"error": "No such sensor!"});
+});
+
 app.listen(8080);
 
 // Write local db content to localdb.json
