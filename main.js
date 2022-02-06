@@ -153,6 +153,20 @@ app.get('/reservoirs', (req, res) => {
     res.status(200).send(bot.reservoirs);
 });
 
+app.patch('/reservoirs/:reservoirId', (req, res) => {
+    if (!localdb.data.config.reservoirs.hasOwnProperty(req.params.reservoirId)) {
+        res.status(400).send({"error": "No such reservoir!"});
+    }
+
+    const { content, amount } = req.body;
+    const reservoir = localdb.data.config.reservoirs[req.params.reservoirId];
+
+    if (content !== undefined) reservoir.content = content;
+    if (amount !== undefined) reservoir.amount = amount;
+
+    res.status(200).send({"success": "Reservoir updated!"});
+});
+
 app.get('/status', (req, res) => {
     res.status(200).send(bot.status);
 });
