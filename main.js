@@ -26,8 +26,9 @@ const bot = new CocktailBot(localdb.data.config, localdb.data.reservoirs);
 const app = express();
 app.use(express.json());
 
-// RESTful API
+// RESTful API //
 
+// Drinks
 app.get('/drinks', (req, res) => {    
     const { available, minAmount = 1} = req.query;
     
@@ -54,7 +55,7 @@ app.get('/drinks/:drinkId', (req, res) => {
         res.status(404).send({"error": "No such drink!"});
         return;
     }
-    res.status(200).send(drinks[req.params.drinkId]);
+    res.status(200).send(drink);
 });
 
 app.patch('/drinks/:drinkId', (req, res) => {
@@ -78,8 +79,74 @@ app.patch('/drinks/:drinkId', (req, res) => {
     res.status(200).send({"success": "Production started!"});
 });
 
+app.put('/drinks/:drinkId', (req, res) => {
+    if (!menu.validateDrink(req.body)) {
+        res.status(400).send({"error": "Invalid drink!"});
+        return;
+    }
+    
+    if (!menu.putDrink(req.body)) {
+        res.status(400).send({"success": "No such drink!"});
+        return;
+    }
+
+    res.status(200).send({"success": "Drink edited!"});
+});
+
+app.post('/drinks/:drinkId', (req, res) => {
+    if (!menu.validateDrink(req.body)) {
+        res.status(400).send({"error": "Invalid drink!"});
+        return;
+    }
+    
+    if (!menu.putDrink(req.body)) {
+        res.status(400).send({"success": "Drink ID is already used!"});
+        return;
+    }
+
+    res.status(200).send({"success": "Drink added!"});
+});
+
+// Ingredients
 app.get('/ingredients', (req, res) => {    
     res.status(200).send(menu.getIngredients());
+});
+
+app.get('/ingredients/:ingredientId', (req, res) => {
+    const ingredient = menu.getIngredient(req.params.ingredientId);
+    if (!ingredient) {
+        res.status(404).send({"error": "No such ingredient!"});
+        return;
+    }
+    res.status(200).send(ingredient);
+});
+
+app.put('/ingredients/:ingredientId', (req, res) => {
+    if (!menu.validateIngredient(req.body)) {
+        res.status(400).send({"error": "Invalid ingredient!"});
+        return;
+    }
+    
+    if (!menu.putIngredient(req.body)) {
+        res.status(400).send({"success": "No such ingredient!"});
+        return;
+    }
+
+    res.status(200).send({"success": "Ingredient edited!"});
+});
+
+app.post('/ingredients/:ingredientId', (req, res) => {
+    if (!menu.validateIngredient(req.body)) {
+        res.status(400).send({"error": "Invalid ingredient!"});
+        return;
+    }
+    
+    if (!menu.putIngredient(req.body)) {
+        res.status(400).send({"success": "Ingredient ID is already used!"});
+        return;
+    }
+
+    res.status(200).send({"success": "Ingredient added!"});
 });
 
 app.get('/reservoirs', (req, res) => {
@@ -90,6 +157,7 @@ app.get('/status', (req, res) => {
     res.status(200).send(bot.status);
 });
 
+// Set output
 app.patch('/status', (req, res) => {
     const { activeOutput = null } = req.body;
 
