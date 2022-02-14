@@ -10,6 +10,7 @@
   "author": "János Arenhövel",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.2",
     "lowdb": "^3.0.0",
     "serialport": "^9.2.8",

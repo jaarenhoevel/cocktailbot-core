@@ -2,6 +2,7 @@ import { join, dirname } from 'path'
 import { Low, JSONFile } from 'lowdb'
 import { fileURLToPath } from 'url'
 import express from 'express';
+import cors from 'cors';
 
 import Menu from './Menu.js';
 import CocktailBot from './CocktailBot.js';
@@ -24,6 +25,7 @@ const menu = new Menu(db, localdb);
 const bot = new CocktailBot(localdb.data.config, localdb.data.reservoirs);
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 // RESTful API //
