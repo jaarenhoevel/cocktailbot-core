@@ -32,23 +32,19 @@ app.use(express.json());
 
 // Drinks
 app.get('/drinks', (req, res) => {    
-    const { available, minAmount = 1} = req.query;
-    
-    if (available) {
-        var availableDrinks = {};
-        var drinks = menu.getDrinks();
-        Object.keys(drinks).forEach(id => {
-            const available = bot.getDrinkAmount(drinks[id]);
-            if ( available >= minAmount) {
-                availableDrinks[id] = drinks[id];
-                availableDrinks[id].available = available;
-            }
-        });
-        
-        res.status(200).send(availableDrinks);
-    } else {
-        res.status(200).send(menu.getDrinks());
-    }
+    const { available = false, minAmount = 1} = req.query;
+
+    var d = {};
+    var drinks = menu.getDrinks();
+    Object.keys(drinks).forEach(id => {
+        const availableAmount = bot.getDrinkAmount(drinks[id]);
+        if ( !available || availableAmount >= minAmount) {
+            d[id] = drinks[id];
+            d[id].available = availableAmount;
+        }
+    });
+
+    res.status(200).send(d);
 });
 
 app.get('/drinks/:drinkId', (req, res) => {    
