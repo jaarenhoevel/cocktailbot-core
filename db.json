@@ -27,7 +27,8 @@
           "id": "juice_lime",
           "portion": 0.2
         }
-      ]
+      ],
+      "proof": 0.08
     },
     "lime_water": {
       "name": "Lame Water",
@@ -40,7 +41,8 @@
           "id": "soda",
           "portion": 0.5
         }
-      ]
+      ],
+      "proof": 0
     }
   }
 }

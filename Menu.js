@@ -61,6 +61,9 @@ class Menu {
     addDrink(drinkId, drink) {
         if (this.drinks.hasOwnProperty(drinkId)) return false;
         if (!this.validateDrink(drink)) return false;
+
+        drink.proof = this.calculateDrinkProof(drink);
+
         this.localdb.data.drinks[drinkId] = drink;
         
         this.mergeDatabases();
@@ -70,6 +73,9 @@ class Menu {
     putDrink(drinkId, drink) {
         if (!this.drinks.hasOwnProperty(drinkId)) return false;
         if (!this.validateDrink(drink)) return false;
+        
+        drink.proof = this.calculateDrinkProof(drink);
+
         this.localdb.data.drinks[drinkId] = drink;
         
         this.mergeDatabases();
@@ -97,6 +103,17 @@ class Menu {
         if (!name) return false;
 
         return proof >= 0 && proof <= 1;
+    }
+
+    calculateDrinkProof(drink) {
+        let proof = 0;
+
+        drink.ingredients.forEach((i) => {
+            const ingredient = this.getIngredient(i.id);
+            proof += (ingredient?.proof || 0) * i.portion;
+        });    
+
+        return proof;
     }
 }
 
