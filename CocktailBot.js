@@ -31,6 +31,9 @@ class CocktailBot {
 
         if (availableAmount === 0) throw new Error("Can't produce requested drink!");
 
+        this.status.ready = false;
+        this.status.drink = drink;
+
         const simpleRecipe = [];
 
         // Create simple recipe with just ingredient id and amount
@@ -51,6 +54,7 @@ class CocktailBot {
         });
 
         this.status.ready = true;
+        this.status.drink = null;
 
         this.backwash(); // no await here since drink is already finished
     }
