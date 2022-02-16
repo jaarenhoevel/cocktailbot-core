@@ -24,6 +24,8 @@ localdb.data ||= { config: { pumps: {}, outputs: {} }, reservoirs: [], ingredien
 const menu = new Menu(db, localdb);
 const bot = new CocktailBot(localdb.data.config, localdb.data.reservoirs);
 
+const processes = {};
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -70,11 +72,22 @@ app.patch('/drinks/:drinkId', (req, res) => {
         return;
     }
 
-    bot.makeDrink(drink, amount).catch(err => {
-        console.log(err);
+    const processStatus = {
+        "status": "running",
+        "errors": []
+    };
+
+    const processId = [...Array(16)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+
+    processes[processId] = processStatus;
+
+    bot.makeDrink(drink, amount).then(() => {
+        processStatus.status = "finished";
+    }).catch(err => {
+        processStatus.errors.push(err);
     });
 
-    res.status(200).send({"success": "Production started!"});
+    res.status(200).send({"success": "Production started!", "processId": processId});
 });
 
 app.put('/drinks/:drinkId', (req, res) => {
@@ -243,6 +256,20 @@ app.patch('/sensors/:sensorId', (req, res) => {
     }
 
     res.status(400).send({"error": "No such sensor!"});
+});
+
+// Processes
+app.get('/processes', (req, res) => {
+    res.status(200).send(processes);
+});
+
+app.get('/processes/:processId', (req, res) => {    
+    const process = processes[req.params.processId]
+    if (!process) {
+        res.status(404).send({"error": "No such process!"});
+        return;
+    }
+    res.status(200).send(process);
 });
 
 app.listen(8080);
