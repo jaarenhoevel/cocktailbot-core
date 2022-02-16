@@ -9,6 +9,9 @@
     },
     "juice_lime": {
       "name": "Lime Juice"
+    },
+    "cola": {
+      "name": "Cola"
     }
   },
   "drinks": {
@@ -43,6 +46,20 @@
         }
       ],
       "proof": 0
+    },
+    "rum_cola": {
+      "name": "Rum Cola",
+      "ingredients": [
+        {
+          "id": "cola",
+          "portion": 0.6
+        },
+        {
+          "id": "rum",
+          "portion": 0.4
+        }
+      ],
+      "proof": 0.24
     }
   }
 }
