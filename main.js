@@ -74,6 +74,7 @@ app.patch('/drinks/:drinkId', (req, res) => {
 
     const processStatus = {
         "status": "running",
+        "start": Date.now,
         "errors": []
     };
 
