@@ -75,6 +75,7 @@ app.patch('/drinks/:drinkId', (req, res) => {
     const processStatus = {
         "status": "running",
         "start": Date.now,
+        "progress": null,
         "errors": []
     };
 
@@ -82,7 +83,7 @@ app.patch('/drinks/:drinkId', (req, res) => {
 
     processes[processId] = processStatus;
 
-    bot.makeDrink(drink, amount).then(() => {
+    bot.makeDrink(drink, amount, (progress) => processStatus.progress = progress).then(() => {
         processStatus.status = "finished";
     }).catch(err => {
         processStatus.errors.push(err);

@@ -21,7 +21,7 @@ class CocktailBot {
         });
     }
 
-    async makeDrink(drink, amount) {
+    async makeDrink(drink, amount, onProgress = null) {
         if (!this.status.ready) throw new Error("CocktailBot not ready!");
         if (!drink) throw new Error("No drink specified!");
         if (this.status.activeOutput === null) throw new Error("Select active output!");
@@ -33,6 +33,8 @@ class CocktailBot {
 
         this.status.ready = false;
         this.status.drink = drink;
+
+        if (onProgress) onProgress(0);
 
         const simpleRecipe = [];
 
@@ -55,6 +57,8 @@ class CocktailBot {
 
         this.status.ready = true;
         this.status.drink = null;
+
+        if (onProgress) onProgress(1);
 
         this.backwash(); // no await here since drink is already finished
     }
