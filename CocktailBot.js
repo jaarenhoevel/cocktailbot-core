@@ -113,6 +113,10 @@ class CocktailBot {
 
             // Substract weight gain from reservoir amount
             reservoir.amount -= (await this.controller.getWeight() - startWeight) + pumpLostAmount;
+            if (reservoir.amount < 0) {
+                reservoir.amount = 0;
+                console.log("Warning: Pumped more than should be in reservoir");
+            }
 
             // Check if pumping was successful
             if (success) {

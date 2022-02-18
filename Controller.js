@@ -54,6 +54,7 @@ class Controller {
             const promise = this.awaitingResponse[commandId];
 
             if (commandResult === "OK") promise.resolve(data);
+            else if (data[0] === "Unrecognized") return;
             else promise.reject(new Error(`${commandResult}: ${data.join(" ")}`));
 
             delete this.awaitingResponse[commandId];
