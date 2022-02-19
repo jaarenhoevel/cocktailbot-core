@@ -1,5 +1,11 @@
 {
   "ingredients": {
+    "backwash_water_fresh": {
+      "name": "Fresh Backwash Water"
+    },
+    "backwash_water_used": {
+      "name": "Used Backwash Water"
+    },
     "rum_white": {
       "name": "White Rum",
       "proof": 0.4
