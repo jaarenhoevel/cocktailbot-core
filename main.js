@@ -167,17 +167,39 @@ app.get('/reservoirs', (req, res) => {
 });
 
 app.patch('/reservoirs/:reservoirId', (req, res) => {
-    if (!localdb.data.config.reservoirs.hasOwnProperty(req.params.reservoirId)) {
+    if (!localdb.data.reservoirs[req.params.reservoirId]) {
         res.status(400).send({"error": "No such reservoir!"});
+        return;
     }
 
     const { content, amount } = req.body;
-    const reservoir = localdb.data.config.reservoirs[req.params.reservoirId];
+    const reservoir = localdb.data.reservoirs[req.params.reservoirId];
 
     if (content !== undefined) reservoir.content = content;
     if (amount !== undefined) reservoir.amount = amount;
 
     res.status(200).send({"success": "Reservoir updated!"});
+});
+
+app.post('/reservoirs/:reservoirId/refill', (req, res) => {
+    if (!localdb.data.reservoirs[req.params.reservoirId]) {
+        res.status(400).send({"error": "No such reservoir!"});
+        return;
+    }
+
+    const { time = 10 } = req.body;
+    const reservoir = localdb.data.reservoirs[req.params.reservoirId];
+
+    const stopRefilling = bot.refillReservoir(reservoir);
+
+    if (!stopRefilling) {
+        res.status(500).send({"error": "Bot not ready!"});
+        return;
+    }
+
+    setTimeout(stopRefilling, time * 1000);
+
+    res.status(200).send({"success": "Refilling started!"});
 });
 
 app.get('/status', (req, res) => {
