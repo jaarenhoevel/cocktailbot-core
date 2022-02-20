@@ -180,12 +180,38 @@ class CocktailBot {
             await Promise.all(promises);
         }
 
-        this.stopPump();
+        await this.stopPump();
 
         // Restore previously active output
         await this.setActiveOutput(currentOutput);
 
         this.status.ready = true;
+    }
+
+    refillReservoir(reservoir, input = "refill") {
+        const currentOutput = this.status.activeOutput;
+        
+        const startRefilling = async () => {
+            // Set right output
+            await this.setActiveOutput(input);
+            
+            // Open reservoir
+            await this.setReservoir(reservoir, true);
+            
+            // Start pumping
+            await this.startPump("backward");    
+        };
+
+        const stopRefilling = async () => {
+            // Stop pump and close reservoir
+            await this.stopPump();
+            await this.setReservoir(reservoir, false);
+
+            await this.setActiveOutput(currentOutput);
+        };
+
+        startRefilling();
+        return stopRefilling;
     }
 
     getDrinkAmount(drink) {
