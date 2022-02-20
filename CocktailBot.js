@@ -277,17 +277,29 @@ class CocktailBot {
         console.log(`Waiting for target weight of ${targetWeight}g with ${timeout}ms timeout`);
         
         return new Promise((resolve, reject) => {
+            let lastWeight = Number.MAX_SAFE_INTEGER;
+            
+            const cancelWaiting = () => {
+                clearInterval(interval);
+                reject(new Error("Timeout while waiting for weight change!"));
+            };
+            let timeoutId = setTimeout(cancelWaiting, timeout);
+            
             const interval = setInterval(async () => {
                 const weight = await this.controller.getWeight();
                 if (weight >= targetWeight) resolve();
+                
+                // Reset timeout when weight rises
+                if (weight > lastWeight + 2) {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(cancelWaiting, timeout);
+                    console.log(`Resetted weight wait timeout`);
+                }
 
-                //console.log(`Current weight is ${weight}g, but we're waiting for at least ${targetWeight}g`);
+                lastWeight = weight;
+
+                console.log(`Current weight is ${weight}g, but we're waiting for at least ${targetWeight}g`);
             }, 500);
-            
-            setTimeout(() => {
-                clearInterval(interval);
-                reject(new Error("Timeout while waiting for weight change!"));
-            }, timeout);
         });
     }
 
