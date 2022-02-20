@@ -189,9 +189,12 @@ class CocktailBot {
     }
 
     refillReservoir(reservoir, input = "refill") {
+        if (!this.status.ready) return false;
         const currentOutput = this.status.activeOutput;
         
         const startRefilling = async () => {
+            this.status.ready = false;
+
             // Set right output
             await this.setActiveOutput(input);
             
@@ -208,6 +211,8 @@ class CocktailBot {
             await this.setReservoir(reservoir, false);
 
             await this.setActiveOutput(currentOutput);
+
+            this.status.ready = true;
         };
 
         startRefilling();
