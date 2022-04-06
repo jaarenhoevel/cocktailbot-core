@@ -186,15 +186,12 @@ class CocktailBot {
 
         await this.stopPump();
 
-<<<<<<< HEAD
         // Close active output
         await this.setActiveOutput(null);
-=======
         await Promise.all([this.setReservoir(freshWaterReservoir, false), this.setReservoir(usedWaterReservoir, false)]);
 
         // Restore previously active output
         await this.setActiveOutput(currentOutput);
->>>>>>> 4676ae2266bd87bd722d58a85660264f49378a5b
 
         this.status.ready = true;
     }
