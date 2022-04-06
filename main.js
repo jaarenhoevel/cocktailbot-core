@@ -6,7 +6,6 @@ import cors from 'cors';
 
 import Menu from './Menu.js';
 import CocktailBot from './CocktailBot.js';
-import res from 'express/lib/response';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
