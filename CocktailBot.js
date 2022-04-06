@@ -8,14 +8,15 @@ class CocktailBot {
         this.status = {
             drink: null,
             ready: false,
-            activeOutput: null
+            activeOutput: null,
+            selectedOutput: "default",
         }
 
         this.controller = new Controller(config);
         this.controller.connect()
         .then(() => {
             this.status.ready = true;
-            this.setActiveOutput("default").catch(err => console.log(err));
+            //this.setActiveOutput("default").catch(err => console.log(err));
         }).catch(err => {
             console.log(err);    
         });
@@ -24,7 +25,11 @@ class CocktailBot {
     async makeDrink(drink, amount, onProgress = null) {
         if (!this.status.ready) throw new Error("CocktailBot not ready!");
         if (!drink) throw new Error("No drink specified!");
-        if (this.status.activeOutput === null) throw new Error("Select active output!");
+        if (this.status.activeOutput === null) {
+            if (this.status.lastOutput === null) throw new Error("Select active output!");
+
+            await this.setActiveOutput(this.status.selectedOutput);
+        }
 
         const availableAmount = this.getDrinkAmount(drink);
         if (availableAmount < amount) console.log("Not enough ressources for drink! Trying anyways...");
@@ -146,7 +151,6 @@ class CocktailBot {
         this.status.ready = false;
 
         // Close output valves
-        const currentOutput = this.status.activeOutput;
         await this.setActiveOutput(null);
         
         // Open fresh and used water reservoir valves
@@ -182,15 +186,14 @@ class CocktailBot {
 
         await this.stopPump();
 
-        // Restore previously active output
-        await this.setActiveOutput(currentOutput);
+        // Close active output
+        await this.setActiveOutput(null);
 
         this.status.ready = true;
     }
 
     refillReservoir(reservoir, input = "refill") {
         if (!this.status.ready) return false;
-        const currentOutput = this.status.activeOutput;
         
         const startRefilling = async () => {
             this.status.ready = false;
@@ -210,7 +213,7 @@ class CocktailBot {
             await this.stopPump();
             await this.setReservoir(reservoir, false);
 
-            await this.setActiveOutput(currentOutput);
+            await this.setActiveOutput(null);
 
             this.status.ready = true;
         };

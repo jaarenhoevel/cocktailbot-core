@@ -6,6 +6,7 @@ import cors from 'cors';
 
 import Menu from './Menu.js';
 import CocktailBot from './CocktailBot.js';
+import res from 'express/lib/response';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -208,18 +209,17 @@ app.get('/status', (req, res) => {
 
 // Set output
 app.patch('/status', (req, res) => {
-    const { activeOutput = null } = req.body;
+    const { selectedOutput = null } = req.body;
 
-    if (!activeOutput) {
+    if (!selectedOutput) {
         res.status(400).send({"error": "No output specified!"});
         return;
     }
 
-    bot.setActiveOutput(activeOutput).then(() => {
-        res.status(200).send({"success": "Output set!"});
-    }).catch(err => {
-        res.status(500).send({"error": err.message});
-    });
+    if (!bot.config.outputs.hasOwnProperty(selectedOutput)) res.status(400).send({"error": "No such output!"});
+
+    bot.status.selectedOutput = selectedOutput;
+    res.send({"success": "Selected output!"});
 });
 
 app.get('/config', (req, res) => {
